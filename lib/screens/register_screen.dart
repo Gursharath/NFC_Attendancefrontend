@@ -4,8 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nfc_manager/nfc_manager.dart';
+
 import '../services/auth_service.dart';
-import 'login_screen.dart'; // ✅ import the login screen
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -20,6 +21,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final emailController = TextEditingController();
   final courseController = TextEditingController();
   bool loading = false;
+  Map<String, dynamic>? scannedStudent;
 
   Future<void> registerStudent() async {
     if (nfcIdController.text.isEmpty ||
@@ -60,6 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       nameController.clear();
       emailController.clear();
       courseController.clear();
+      setState(() => scannedStudent = null);
     } else {
       final msg = jsonDecode(response.body);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -100,6 +103,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
           setState(() {
             nfcIdController.text = nfcId;
           });
+
+          final auth = Provider.of<AuthService>(context, listen: false);
+          final token = await auth.getToken();
+          final res = await http.get(
+            Uri.parse('http://192.168.1.31:8000/api/students/nfc/$nfcId'),
+            headers: {'Authorization': 'Bearer $token'},
+          );
+
+          if (res.statusCode == 200) {
+            setState(() {
+              scannedStudent = jsonDecode(res.body);
+            });
+          } else {
+            setState(() => scannedStudent = null);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('⚠️ Student not found for this NFC ID'),
+              ),
+            );
+          }
 
           ScaffoldMessenger.of(
             context,
@@ -228,6 +251,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: const Text("Register Student"),
                   ),
                 ),
+            const SizedBox(height: 30),
+
+            // 👇 Display scanned student info (if available)
+            if (scannedStudent != null)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2C2C3E),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF00BFA6)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "🎓 Student Found",
+                      style: GoogleFonts.orbitron(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF00BFA6),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      "👤 Name: ${scannedStudent!['name']}",
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "📧 Email: ${scannedStudent!['email']}",
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "🏫 Course: ${scannedStudent!['course']}",
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "🆔 NFC ID: ${scannedStudent!['nfc_id']}",
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),

@@ -2,6 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:local_auth/local_auth.dart'; // ✅ biometric import
+
 import '../services/auth_service.dart';
 import 'home_screen.dart';
 
@@ -15,6 +17,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final LocalAuthentication authBiometric =
+      LocalAuthentication(); // ✅ biometric instance
   bool loading = false;
 
   @override
@@ -81,6 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         decoration: inputDeco("Password", Icons.lock),
                       ),
                       const SizedBox(height: 30),
+
                       loading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : SizedBox(
@@ -128,6 +133,27 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
+
+                      const SizedBox(height: 20),
+
+                      // 🔐 Biometric Login Button
+                      ElevatedButton.icon(
+                        onPressed: _authenticateWithBiometrics,
+                        icon: const Icon(
+                          Icons.fingerprint,
+                          color: Colors.white,
+                        ),
+                        label: Text(
+                          "Login with Fingerprint",
+                          style: GoogleFonts.poppins(color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black26,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -156,5 +182,40 @@ class _LoginScreenState extends State<LoginScreen> {
         borderSide: const BorderSide(color: Colors.white),
       ),
     );
+  }
+
+  Future<void> _authenticateWithBiometrics() async {
+    try {
+      bool canCheck = await authBiometric.canCheckBiometrics;
+      bool isSupported = await authBiometric.isDeviceSupported();
+
+      if (!canCheck || !isSupported) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Biometric authentication not supported'),
+          ),
+        );
+        return;
+      }
+
+      bool authenticated = await authBiometric.authenticate(
+        localizedReason: 'Scan your fingerprint to login',
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true,
+        ),
+      );
+
+      if (authenticated) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Biometric Error: $e')));
+    }
   }
 }
