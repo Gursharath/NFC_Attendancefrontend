@@ -39,7 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final token = await auth.getToken();
 
     final response = await http.post(
-      Uri.parse('http://192.168.1.31:8000/api/students'),
+      Uri.parse('http://10.129.38.100:8000/api/students'),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           final auth = Provider.of<AuthService>(context, listen: false);
           final token = await auth.getToken();
           final res = await http.get(
-            Uri.parse('http://192.168.1.31:8000/api/students/nfc/$nfcId'),
+            Uri.parse('http://10.129.38.100:8000/api/students/nfc/$nfcId'),
             headers: {'Authorization': 'Bearer $token'},
           );
 

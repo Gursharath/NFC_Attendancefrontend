@@ -67,7 +67,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
       final token =
           await Provider.of<AuthService>(context, listen: false).getToken();
       final response = await http.get(
-        Uri.parse('http://192.168.1.31:8000/api/students'),
+        Uri.parse('http://10.129.38.100:8000/api/students'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

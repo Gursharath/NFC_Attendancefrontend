@@ -56,7 +56,7 @@ class _NFCAttendanceScreenState extends State<NFCAttendanceScreen> {
           final token =
               await Provider.of<AuthService>(context, listen: false).getToken();
           final response = await http.post(
-            Uri.parse('http://192.168.1.31:8000/api/attendance/mark'),
+            Uri.parse('http://10.129.38.100:8000/api/attendance/mark'),
             headers: {
               'Authorization': 'Bearer $token',
               'Content-Type': 'application/json',

@@ -27,7 +27,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     final token =
         await Provider.of<AuthService>(context, listen: false).getToken();
     final response = await http.get(
-      Uri.parse('http://192.168.1.31:8000/api/attendance/today'),
+      Uri.parse('http://10.129.38.100:8000/api/attendance/today'),
       headers: {'Authorization': 'Bearer $token'},
     );
 

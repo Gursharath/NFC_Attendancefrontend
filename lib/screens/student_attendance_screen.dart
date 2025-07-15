@@ -34,7 +34,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
         await Provider.of<AuthService>(context, listen: false).getToken();
     final response = await http.get(
       Uri.parse(
-        'http://192.168.1.31:8000/api/attendance/${widget.studentId}/history',
+        'http://10.129.38.100:8000/api/attendance/${widget.studentId}/history',
       ),
       headers: {
         'Authorization': 'Bearer $token',
