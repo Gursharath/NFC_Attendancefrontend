@@ -9,7 +9,7 @@ class AuthService extends ChangeNotifier {
 
   Future<bool> login(String email, String password) async {
     final res = await http.post(
-      Uri.parse('http://10.129.38.100:8000/api/login'),
+      Uri.parse('http://10.148.36.100:8000/api/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
     );
